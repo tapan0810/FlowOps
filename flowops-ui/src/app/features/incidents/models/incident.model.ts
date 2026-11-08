@@ -25,7 +25,7 @@ export interface Incident{
     assignedTo:string;
 
     createdAt:string;
-    slaTargetMinutes:string;
+    slaTargetMinutes:number;
 
 
 }
