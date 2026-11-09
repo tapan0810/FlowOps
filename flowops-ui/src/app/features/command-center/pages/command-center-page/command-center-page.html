@@ -1,1 +1,139 @@
-<p>command-center-page works!</p>
+
+<div class="dashboard">
+
+  <!-- Page heading -->
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">OVERVIEW</span>
+      <h1>Command Center</h1>
+      <p>Monitor operational health and incident activity across your organization.</p>
+    </div>
+
+    <button type="button" class="refresh-button">
+      ↻ Refresh
+    </button>
+  </section>
+
+  <!-- KPI cards -->
+  <section class="kpi-grid">
+
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Total Incidents</span>
+        <span class="kpi-icon blue">◫</span>
+      </div>
+      <div class="kpi-value">{{ totalIncidents() }}</div>
+      <span class="kpi-description">All recorded incidents</span>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Open Incidents</span>
+        <span class="kpi-icon orange">◷</span>
+      </div>
+      <div class="kpi-value">{{ openIncidents() }}</div>
+      <span class="kpi-description">Awaiting resolution</span>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Critical Incidents</span>
+        <span class="kpi-icon red">!</span>
+      </div>
+      <div class="kpi-value">{{ criticalIncidents() }}</div>
+      <span class="kpi-description">Require immediate attention</span>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Resolved Incidents</span>
+        <span class="kpi-icon green">✓</span>
+      </div>
+      <div class="kpi-value">{{ resolvedIncidents() }}</div>
+      <span class="kpi-description">Successfully completed</span>
+    </article>
+
+  </section>
+
+  <!-- Recent Incidents Table -->
+  <section class="incidents-section">
+
+    <div class="section-heading">
+      <div>
+        <h2>Recent Incidents</h2>
+        <p>Monitor and track your latest operational incidents.</p>
+      </div>
+
+      <span class="view-all-button">Incident overview</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="incidents-table">
+
+        <thead>
+          <tr>
+            <th>Incident</th>
+            <th>Service</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (incident of incidents(); track incident.id) {
+            <tr>
+              <td>
+                <div class="incident-info">
+                  <span class="incident-id">{{ incident.id }}</span>
+                  <span class="incident-title">{{ incident.title }}</span>
+                </div>
+              </td>
+
+              <td>{{ incident.serviceName }}</td>
+
+              <td>
+                <span
+                  class="severity-badge"
+                  [class.critical]="incident.severity === 'Critical'"
+                  [class.high]="incident.severity === 'High'"
+                  [class.medium]="incident.severity === 'Medium'"
+                  [class.low]="incident.severity === 'Low'"
+                >
+                  {{ incident.severity }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="status-badge"
+                  [class.investigating]="incident.status === 'Investigating'"
+                  [class.assigned]="incident.status === 'Assigned'"
+                  [class.triaged]="incident.status === 'Triaged'"
+                  [class.new]="incident.status === 'New'"
+                  [class.resolved]="incident.status === 'Resolved' || incident.status === 'Closed'"
+                >
+                  {{ incident.status }}
+                </span>
+              </td>
+
+              <td>{{ incident.assignedTo }}</td>
+
+              <td>{{ incident.createdAt | date:'MMM d, h:mm a' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">
+                No incidents found.
+              </td>
+            </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+
+  </section>
+
+</div>
