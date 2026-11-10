@@ -406,3 +406,11 @@
     flex: auto;
   }
 }
+.incident-link {
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover .incident-title {
+    color: #2563eb;
+  }
+}

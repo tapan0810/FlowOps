@@ -1,209 +1,180 @@
-
 <div class="dashboard">
 
-  <!-- Page heading -->
-  <section class="page-heading">
-    <div>
-      <span class="eyebrow">OVERVIEW</span>
-      <h1>Command Center</h1>
-      <p>Monitor operational health and incident activity across your organization.</p>
+    <!-- Page heading -->
+    <section class="page-heading">
+        <div>
+            <span class="eyebrow">OVERVIEW</span>
+            <h1>Command Center</h1>
+            <p>Monitor operational health and incident activity across your organization.</p>
+        </div>
+
+        <button type="button" class="refresh-button">
+            ↻ Refresh
+        </button>
+    </section>
+
+
+    <!-- KPI cards -->
+    <section class="kpi-grid">
+
+        <article class="kpi-card">
+            <div class="kpi-top">
+                <span class="kpi-label">Total Incidents</span>
+                <span class="kpi-icon blue">◫</span>
+            </div>
+            <div class="kpi-value">{{ totalIncidents() }}</div>
+            <span class="kpi-description">All recorded incidents</span>
+        </article>
+
+        <article class="kpi-card">
+            <div class="kpi-top">
+                <span class="kpi-label">Open Incidents</span>
+                <span class="kpi-icon orange">◷</span>
+            </div>
+            <div class="kpi-value">{{ openIncidents() }}</div>
+            <span class="kpi-description">Awaiting resolution</span>
+        </article>
+
+        <article class="kpi-card">
+            <div class="kpi-top">
+                <span class="kpi-label">Critical Incidents</span>
+                <span class="kpi-icon red">!</span>
+            </div>
+            <div class="kpi-value">{{ criticalIncidents() }}</div>
+            <span class="kpi-description">Require immediate attention</span>
+        </article>
+
+        <article class="kpi-card">
+            <div class="kpi-top">
+                <span class="kpi-label">Resolved Incidents</span>
+                <span class="kpi-icon green">✓</span>
+            </div>
+            <div class="kpi-value">{{ resolvedIncidents() }}</div>
+            <span class="kpi-description">Successfully completed</span>
+        </article>
+
+    </section>
+
+
+    <!-- Search and filter toolbar -->
+    <div class="incident-toolbar">
+
+        <div class="incident-search">
+            <span>⌕</span>
+
+            <input type="search" placeholder="Search by ID, title or service..." [value]="searchTerm()"
+                (input)="onSearchInput($event)" aria-label="Search incidents" />
+        </div>
+
+        <select [value]="selectedSeverity()" (change)="onSeverityChange($event)" aria-label="Filter by severity">
+            <option value="All">All Severities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+
+        <select [value]="selectedStatus()" (change)="onStatusChange($event)" aria-label="Filter by status">
+            <option value="All">All Statuses</option>
+            <option value="New">New</option>
+            <option value="Triaged">Triaged</option>
+            <option value="Assigned">Assigned</option>
+            <option value="Investigating">Investigating</option>
+            <option value="Mitigated">Mitigated</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+        </select>
+
+        <select [value]="sortOrder()" (change)="onSortChange($event)" aria-label="Sort incidents by creation date">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
+
+        <button type="button" class="clear-filters" (click)="clearFilters()">
+            Clear
+        </button>
+
     </div>
 
-    <button type="button" class="refresh-button">
-      ↻ Refresh
-    </button>
-  </section>
-
-  
-  <!-- KPI cards -->
-  <section class="kpi-grid">
-
-    <article class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Total Incidents</span>
-        <span class="kpi-icon blue">◫</span>
-      </div>
-      <div class="kpi-value">{{ totalIncidents() }}</div>
-      <span class="kpi-description">All recorded incidents</span>
-    </article>
-
-    <article class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Open Incidents</span>
-        <span class="kpi-icon orange">◷</span>
-      </div>
-      <div class="kpi-value">{{ openIncidents() }}</div>
-      <span class="kpi-description">Awaiting resolution</span>
-    </article>
-
-    <article class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Critical Incidents</span>
-        <span class="kpi-icon red">!</span>
-      </div>
-      <div class="kpi-value">{{ criticalIncidents() }}</div>
-      <span class="kpi-description">Require immediate attention</span>
-    </article>
-
-    <article class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Resolved Incidents</span>
-        <span class="kpi-icon green">✓</span>
-      </div>
-      <div class="kpi-value">{{ resolvedIncidents() }}</div>
-      <span class="kpi-description">Successfully completed</span>
-    </article>
-
-  </section>
-
-
-<!-- Search and filter toolbar -->
-<div class="incident-toolbar">
-
-  <div class="incident-search">
-    <span>⌕</span>
-
-    <input
-      type="search"
-      placeholder="Search by ID, title or service..."
-      [value]="searchTerm()"
-      (input)="onSearchInput($event)"
-      aria-label="Search incidents"
-    />
-  </div>
-
-  <select
-    [value]="selectedSeverity()"
-    (change)="onSeverityChange($event)"
-    aria-label="Filter by severity"
-  >
-    <option value="All">All Severities</option>
-    <option value="Critical">Critical</option>
-    <option value="High">High</option>
-    <option value="Medium">Medium</option>
-    <option value="Low">Low</option>
-  </select>
-
-  <select
-    [value]="selectedStatus()"
-    (change)="onStatusChange($event)"
-    aria-label="Filter by status"
-  >
-    <option value="All">All Statuses</option>
-    <option value="New">New</option>
-    <option value="Triaged">Triaged</option>
-    <option value="Assigned">Assigned</option>
-    <option value="Investigating">Investigating</option>
-    <option value="Mitigated">Mitigated</option>
-    <option value="Resolved">Resolved</option>
-    <option value="Closed">Closed</option>
-  </select>
-
-  <select
-    [value]="sortOrder()"
-    (change)="onSortChange($event)"
-    aria-label="Sort incidents by creation date"
-  >
-    <option value="newest">Newest First</option>
-    <option value="oldest">Oldest First</option>
-  </select>
-
-  <button
-    type="button"
-    class="clear-filters"
-    (click)="clearFilters()"
-  >
-    Clear
-  </button>
-
-</div>
-
-<div class="result-count">
-  Showing {{ filteredIncidents().length }} of {{ totalIncidents() }} incidents
-</div>
-
-
-  <!-- Recent Incidents Table -->
-  <section class="incidents-section">
-
-    <div class="section-heading">
-      <div>
-        <h2>Recent Incidents</h2>
-        <p>Monitor and track your latest operational incidents.</p>
-      </div>
-
-      <span class="view-all-button">Incident overview</span>
+    <div class="result-count">
+        Showing {{ filteredIncidents().length }} of {{ totalIncidents() }} incidents
     </div>
 
-    <div class="table-wrapper">
-      <table class="incidents-table">
 
-        <thead>
-          <tr>
-            <th>Incident</th>
-            <th>Service</th>
-            <th>Severity</th>
-            <th>Status</th>
-            <th>Assigned To</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
+    <!-- Recent Incidents Table -->
+    <section class="incidents-section">
 
-        <tbody>
-          @for (incident of filteredIncidents(); track incident.id) {
-            <tr>
-              <td>
-                <div class="incident-info">
-                  <span class="incident-id">{{ incident.id }}</span>
-                  <span class="incident-title">{{ incident.title }}</span>
-                </div>
-              </td>
+        <div class="section-heading">
+            <div>
+                <h2>Recent Incidents</h2>
+                <p>Monitor and track your latest operational incidents.</p>
+            </div>
 
-              <td>{{ incident.serviceName }}</td>
+            <span class="view-all-button">Incident overview</span>
+        </div>
 
-              <td>
-                <span
-                  class="severity-badge"
-                  [class.critical]="incident.severity === 'Critical'"
-                  [class.high]="incident.severity === 'High'"
-                  [class.medium]="incident.severity === 'Medium'"
-                  [class.low]="incident.severity === 'Low'"
-                >
-                  {{ incident.severity }}
-                </span>
-              </td>
+        <div class="table-wrapper">
+            <table class="incidents-table">
 
-              <td>
-                <span
-                  class="status-badge"
-                  [class.investigating]="incident.status === 'Investigating'"
-                  [class.assigned]="incident.status === 'Assigned'"
-                  [class.triaged]="incident.status === 'Triaged'"
-                  [class.new]="incident.status === 'New'"
-                  [class.resolved]="incident.status === 'Resolved' || incident.status === 'Closed'"
-                >
-                  {{ incident.status }}
-                </span>
-              </td>
+                <thead>
+                    <tr>
+                        <th>Incident</th>
+                        <th>Service</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
 
-              <td>{{ incident.assignedTo }}</td>
+                <tbody>
+                    @for (incident of filteredIncidents(); track incident.id) {
+                    <tr>
+                        <td>
+                            <a class="incident-info incident-link" [routerLink]="['/incidents', incident.id]">
+                                <span class="incident-id">{{ incident.id }}</span>
+                                <span class="incident-title">{{ incident.title }}</span>
+                            </a>
+                        </td>
 
-              <td>{{ incident.createdAt | date:'MMM d, h:mm a' }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="empty-state">
-                No incidents found.
-              </td>
-            </tr>
-          }
-        </tbody>
+                        <td>{{ incident.serviceName }}</td>
 
-      </table>
-    </div>
+                        <td>
+                            <span class="severity-badge" [class.critical]="incident.severity === 'Critical'"
+                                [class.high]="incident.severity === 'High'"
+                                [class.medium]="incident.severity === 'Medium'"
+                                [class.low]="incident.severity === 'Low'">
+                                {{ incident.severity }}
+                            </span>
+                        </td>
 
-  </section>
+                        <td>
+                            <span class="status-badge" [class.investigating]="incident.status === 'Investigating'"
+                                [class.assigned]="incident.status === 'Assigned'"
+                                [class.triaged]="incident.status === 'Triaged'" [class.new]="incident.status === 'New'"
+                                [class.resolved]="incident.status === 'Resolved' || incident.status === 'Closed'">
+                                {{ incident.status }}
+                            </span>
+                        </td>
 
-  
+                        <td>{{ incident.assignedTo }}</td>
+
+                        <td>{{ incident.createdAt | date:'MMM d, h:mm a' }}</td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            No incidents found.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+    </section>
+
+
 
 </div>

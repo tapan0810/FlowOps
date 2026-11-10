@@ -7,10 +7,11 @@ import {
   IncidentSeverity,
   IncidentStatus
 } from '../../../incidents/models/incident.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-command-center-page',
-  imports: [DatePipe],
+  imports: [DatePipe,RouterLink],
   templateUrl: './command-center-page.html',
   styleUrl: './command-center-page.scss'
 })

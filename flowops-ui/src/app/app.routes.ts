@@ -18,6 +18,12 @@ export const routes: Routes = [
                 loadComponent:()=>
                     import('./features/command-center/pages/command-center-page/command-center-page')
                     .then(m =>m.CommandCenterPage)
+            },
+            {
+                path:'incidents/:id',
+                loadComponent:()=>
+                    import('./features/incidents/pages/incident-details-page/incident-details-page')
+                    .then(m => m.IncidentDetailsPage)
             }
         ]
     }
