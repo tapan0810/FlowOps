@@ -1,1 +1,85 @@
-<p>incident-details-page works!</p>
+
+<div class="details-page">
+
+  <a routerLink="/command-center" class="back-link">
+    ← Back to Command Center
+  </a>
+
+  @if (incident(); as item) {
+
+    <section class="details-heading">
+      <div>
+        <span class="eyebrow">INCIDENT DETAILS</span>
+        <h1>{{ item.title }}</h1>
+        <p>{{ item.id }} · {{ item.serviceName }}</p>
+      </div>
+
+      <span
+        class="severity-badge"
+        [class.critical]="item.severity === 'Critical'"
+        [class.high]="item.severity === 'High'"
+        [class.medium]="item.severity === 'Medium'"
+        [class.low]="item.severity === 'Low'"
+      >
+        {{ item.severity }}
+      </span>
+    </section>
+
+    <div class="details-grid">
+
+      <section class="details-card">
+        <h2>Incident Overview</h2>
+
+        <div class="detail-row">
+          <span>Description</span>
+          <strong>{{ item.description }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Service</span>
+          <strong>{{ item.serviceName }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Assigned To</span>
+          <strong>{{ item.assignedTo }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Current Status</span>
+          <strong>{{ item.status }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Created At</span>
+          <strong>{{ item.createdAt | date:'MMM d, y, h:mm a' }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>SLA Target</span>
+          <strong>{{ item.slaTargetMinutes }} minutes</strong>
+        </div>
+      </section>
+
+      <section class="details-card">
+        <h2>Lifecycle Management</h2>
+
+        <p class="coming-soon-text">
+          Status transitions and assignment actions
+          will be implemented in the next lesson.
+        </p>
+      </section>
+
+    </div>
+
+  } @else {
+
+    <section class="details-card not-found">
+      <h2>Incident not found</h2>
+      <p>The requested incident does not exist in the current data source.</p>
+      <a routerLink="/command-center">Return to Command Center</a>
+    </section>
+
+  }
+
+</div>
