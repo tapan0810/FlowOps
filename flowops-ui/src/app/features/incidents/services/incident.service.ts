@@ -12,6 +12,8 @@ import type {
 
 import { MOCK_INCIDENTS } from '../data/incidents.mock';
 
+import { IncidentComment } from '../models/incident-comment.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,6 +28,9 @@ export class IncidentService {
   private readonly _activities = signal<IncidentActivity[]>([]);
 
   readonly activities = this._activities.asReadonly();
+
+  private readonly _comments = signal<IncidentComment[]>([]);
+  readonly comments = this._comments.asReadonly();
 
   // KPI calculations
   readonly totalIncidents = computed(
@@ -173,5 +178,43 @@ export class IncidentService {
       ...current
     ]);
   }
+
+  addComment(
+    incidentId:string,
+    message:string,
+    author='Current User'
+  ):boolean{
+
+    const trimmedMessage = message.trim();
+
+    if(!trimmedMessage){
+        return false;
+    }
+
+    const incidentExists= this.incidents().some(
+        incident => incident.id === incidentId
+    );
+
+    if(!incidentExists){
+        return false;
+    }
+
+    const comment : IncidentComment = {
+    id : `${incidentId}-${Date.now()}`,
+    incidentId,
+    message:trimmedMessage,
+    author,
+    createdAt:new Date().toDateString()
+    };
+
+
+    this._comments.update(current =>[
+        comment,
+        ...current
+    ])
+
+    return true;
+  }
+
 
 }
