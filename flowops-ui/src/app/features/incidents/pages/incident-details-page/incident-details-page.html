@@ -27,6 +27,7 @@
 
     <div class="details-grid">
 
+      <!-- Incident overview -->
       <section class="details-card">
         <h2>Incident Overview</h2>
 
@@ -61,16 +62,81 @@
         </div>
       </section>
 
+      <!-- Lifecycle management -->
       <section class="details-card">
         <h2>Lifecycle Management</h2>
 
-        <p class="coming-soon-text">
-          Status transitions and assignment actions
-          will be implemented in the next lesson.
-        </p>
+        <span class="field-label">Current Status</span>
+
+        <div class="current-status">
+          {{ item.status }}
+        </div>
+
+        <span class="field-label">Available Transitions</span>
+
+        <div class="transition-actions">
+
+          @for (nextStatus of availableTransitions(); track nextStatus) {
+            <button
+              type="button"
+              class="transition-button"
+              (click)="changeStatus(nextStatus)"
+            >
+              Move to {{ nextStatus }}
+            </button>
+          } @empty {
+            <p class="no-transitions">
+              No further transitions available.
+            </p>
+          }
+
+        </div>
+
+        <div class="assignment-section">
+          <span class="field-label">Assign Engineer</span>
+
+          <select
+            [value]="selectedEngineer()"
+            (change)="assignEngineer($event)"
+            aria-label="Assign engineer"
+          >
+            <option value="">Select an engineer</option>
+            <option value="Rahul Sharma">Rahul Sharma</option>
+            <option value="Priya Singh">Priya Singh</option>
+            <option value="Amit Verma">Amit Verma</option>
+            <option value="Neha Das">Neha Das</option>
+          </select>
+        </div>
+
       </section>
 
     </div>
+
+    <!-- Activity timeline -->
+    <section class="details-card activity-section">
+      <h2>Activity History</h2>
+
+      @for (activity of activities(); track activity.id) {
+        <div class="activity-item">
+          <div class="activity-marker"></div>
+
+          <div class="activity-content">
+            <strong>{{ activity.message }}</strong>
+
+            <span>
+              {{ activity.performedBy }}
+              ·
+              {{ activity.createdAt | date:'MMM d, h:mm a' }}
+            </span>
+          </div>
+        </div>
+      } @empty {
+        <p class="no-transitions">
+          No activity recorded yet. Changes will appear here.
+        </p>
+      }
+
+    </section>
 
   } @else {
 
