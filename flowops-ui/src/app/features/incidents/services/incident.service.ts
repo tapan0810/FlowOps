@@ -1,15 +1,16 @@
-import {Injectable,computed,inject,signal} from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { Incident } from '../models/incident.model';
+import { Incident, IncidentStatus } from '../models/incident.model';
 import { MOCK_INCIDENTS } from '../data/incidents.mock';
+import { IncidentActivity } from '../models/incident-activity.model';
 
 @Injectable(
     {
-        providedIn:'root'
+        providedIn: 'root'
     }
 )
 
-export class IncidentService{
+export class IncidentService {
 
     //private writable state
     private readonly _incidents = signal<Incident[]>(MOCK_INCIDENTS);
@@ -22,27 +23,37 @@ export class IncidentService{
         () => this.incidents().length
     );
 
-    readonly criticalIncidents= computed(
-        ()=> this.incidents().filter(
+    readonly criticalIncidents = computed(
+        () => this.incidents().filter(
             incident => incident.severity === 'Critical'
         ).length
     );
 
     readonly openIncidents = computed(
-        ()=> this.incidents().filter(
-            incident=>
-                incident.status !=='Resolved' &&
-                incident.status !=='Closed'
+        () => this.incidents().filter(
+            incident =>
+                incident.status !== 'Resolved' &&
+                incident.status !== 'Closed'
         ).length
     );
 
-     readonly closedIncident = computed(
-        ()=> this.incidents().filter(
-            incident=>
-                incident.status ==='Resolved' ||
-                incident.status ==='Closed'
+    readonly closedIncident = computed(
+        () => this.incidents().filter(
+            incident =>
+                incident.status === 'Resolved' ||
+                incident.status === 'Closed'
         ).length
     );
 
-
+    //Buisness Rules - Allowed status transitions
+    private readonly allowedTransitions: Record<IncidentStatus, readonly IncidentStatus[]>
+        = {
+            New: ['Triaged'],
+            Triaged: ['Assigned'],
+            Assigned: ['Investigating'],
+            Investigating: ['Mitigated'],
+            Mitigated: ['Resolved'],
+            Resolved: ['Closed', 'Investigating'],
+            Closed: []
+        }
 }
