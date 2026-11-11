@@ -56,17 +56,17 @@ export class IncidentService {
 
   // Business rules: allowed status transitions
   private readonly allowedTransitions: Record<
-    IncidentStatus,
-    readonly IncidentStatus[]
-  > = {
-    New: ['Triaged'],
-    Triaged: ['Assigned'],
-    Assigned: ['Investigating'],
-    Investigating: ['Mitigated'],
-    Mitigated: ['Resolved'],
-    Resolved: ['Closed', 'Investigating'],
-    Closed: []
-  };
+  IncidentStatus,
+  readonly IncidentStatus[]
+> = {
+  New: ['Triaged'],
+  Triaged: ['Assigned'],
+  Assigned: ['Investigating'],
+  Investigating: ['Mitigated'],
+  Mitigated: ['Resolved'],
+  Resolved: ['Closed', 'Investigating'],
+  Closed: []
+};
 
   // Change incident status
   transitionIncident(
@@ -150,6 +150,12 @@ export class IncidentService {
 
     return true;
   }
+
+  getAllowedTransitions(
+  currentStatus: IncidentStatus
+): readonly IncidentStatus[] {
+  return this.allowedTransitions[currentStatus] ?? [];
+}
 
   // Add an activity event
   private addActivity(
