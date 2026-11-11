@@ -25,7 +25,7 @@ export class CommandCenterPage {
   readonly totalIncidents = this.incidentService.totalIncidents;
   readonly criticalIncidents = this.incidentService.criticalIncidents;
   readonly openIncidents = this.incidentService.openIncidents;
-  readonly resolvedIncidents = this.incidentService.closedIncident;
+  readonly resolvedIncidents = this.incidentService.resolvedIncidents;
 
   // UI state
   readonly searchTerm = signal('');
