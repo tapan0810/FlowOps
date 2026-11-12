@@ -7,6 +7,10 @@
 
   @if (incident(); as item) {
 
+    <!-- ===================================== -->
+    <!-- INCIDENT HEADER                       -->
+    <!-- ===================================== -->
+
     <section class="details-heading">
       <div>
         <span class="eyebrow">INCIDENT DETAILS</span>
@@ -24,6 +28,11 @@
         {{ item.severity }}
       </span>
     </section>
+
+
+    <!-- ===================================== -->
+    <!-- INCIDENT OVERVIEW AND LIFECYCLE       -->
+    <!-- ===================================== -->
 
     <div class="details-grid">
 
@@ -61,6 +70,7 @@
           <strong>{{ item.slaTargetMinutes }} minutes</strong>
         </div>
       </section>
+
 
       <!-- Lifecycle management -->
       <section class="details-card">
@@ -112,12 +122,87 @@
 
     </div>
 
-    <!-- Activity timeline -->
+
+    <!-- ===================================== -->
+    <!-- SLA MANAGEMENT                        -->
+    <!-- ===================================== -->
+
+    @if (slaMetrics(); as sla) {
+
+      <section class="details-card sla-section">
+
+        <div class="sla-heading">
+          <div>
+            <h2>SLA Monitoring</h2>
+            <p>Resolution target and current SLA consumption.</p>
+          </div>
+
+          <span
+            class="sla-badge"
+            [class.on-track]="sla.health === 'On Track'"
+            [class.at-risk]="sla.health === 'At Risk'"
+            [class.breached]="sla.health === 'Breached'"
+          >
+            {{ sla.health }}
+          </span>
+        </div>
+
+        <div class="sla-metrics">
+
+          <div class="sla-metric">
+            <span>Target</span>
+            <strong>{{ sla.targetMinutes }} min</strong>
+          </div>
+
+          <div class="sla-metric">
+            <span>Elapsed</span>
+            <strong>{{ sla.elapsedMinutes }} min</strong>
+          </div>
+
+          <div class="sla-metric">
+            <span>Remaining</span>
+            <strong>
+              @if (sla.isBreached) {
+                SLA Breached
+              } @else {
+                {{ sla.remainingMinutes }} min
+              }
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="sla-progress-track">
+          <div
+            class="sla-progress-fill"
+            [style.width.%]="sla.progressPercentage"
+            [class.on-track]="sla.health === 'On Track'"
+            [class.at-risk]="sla.health === 'At Risk'"
+            [class.breached]="sla.health === 'Breached'"
+          ></div>
+        </div>
+
+        <div class="sla-progress-footer">
+          <span>{{ sla.progressPercentage }}% consumed</span>
+          <span>{{ sla.targetMinutes }} minute target</span>
+        </div>
+
+      </section>
+
+    }
+
+
+    <!-- ===================================== -->
+    <!-- ACTIVITY HISTORY                      -->
+    <!-- ===================================== -->
+
     <section class="details-card activity-section">
       <h2>Activity History</h2>
 
       @for (activity of activities(); track activity.id) {
+
         <div class="activity-item">
+
           <div class="activity-marker"></div>
 
           <div class="activity-content">
@@ -129,100 +214,122 @@
               {{ activity.createdAt | date:'MMM d, h:mm a' }}
             </span>
           </div>
+
         </div>
+
       } @empty {
+
         <p class="no-transitions">
           No activity recorded yet. Changes will appear here.
         </p>
+
       }
 
     </section>
 
-  } @else {
 
-    <section class="details-card not-found">
-      <h2>Incident not found</h2>
-      <p>The requested incident does not exist in the current data source.</p>
-      <a routerLink="/command-center">Return to Command Center</a>
+    <!-- ===================================== -->
+    <!-- INCIDENT COLLABORATION                -->
+    <!-- ===================================== -->
+
+    <section class="details-card comments-section">
+
+      <div class="comments-heading">
+        <div>
+          <h2>Team Discussion</h2>
+          <p>Share investigation findings and updates.</p>
+        </div>
+
+        <span class="comment-count">
+          {{ comments().length }} comments
+        </span>
+      </div>
+
+      <!-- New comment -->
+      <div class="comment-composer">
+
+        <textarea
+          rows="3"
+          placeholder="Write an investigation update..."
+          [value]="commentText()"
+          (input)="onCommentInput($event)"
+          maxlength="2000"
+        ></textarea>
+
+        <div class="composer-footer">
+          <span>
+            {{ commentText().length }}/2000 characters
+          </span>
+
+          <button
+            type="button"
+            class="comment-submit"
+            [disabled]="!commentText().trim()"
+            (click)="submitComment()"
+          >
+            Post Comment
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Existing comments -->
+      <div class="comments-list">
+
+        @for (comment of comments(); track comment.id) {
+
+          <article class="comment-item">
+
+            <div class="comment-avatar">
+              {{ comment.author.charAt(0).toUpperCase() }}
+            </div>
+
+            <div class="comment-body">
+
+              <div class="comment-meta">
+                <strong>{{ comment.author }}</strong>
+
+                <span>
+                  {{ comment.createdAt | date:'MMM d, y, h:mm a' }}
+                </span>
+              </div>
+
+              <p>{{ comment.message }}</p>
+
+            </div>
+
+          </article>
+
+        } @empty {
+
+          <div class="comments-empty">
+            No comments yet. Start the discussion with your team.
+          </div>
+
+        }
+
+      </div>
+
     </section>
 
 
-<!-- Incident collaboration -->
-<section class="details-card comments-section">
+  } @else {
 
-  <div class="comments-heading">
-    <div>
-      <h2>Team Discussion</h2>
-      <p>Share investigation findings and updates.</p>
-    </div>
+    <!-- ===================================== -->
+    <!-- INCIDENT NOT FOUND                    -->
+    <!-- ===================================== -->
 
-    <span class="comment-count">
-      {{ comments().length }} comments
-    </span>
-  </div>
+    <section class="details-card not-found">
+      <h2>Incident not found</h2>
 
-  <!-- New comment -->
-  <div class="comment-composer">
+      <p>
+        The requested incident does not exist in the current data source.
+      </p>
 
-    <textarea
-      rows="3"
-      placeholder="Write an investigation update..."
-      [value]="commentText()"
-      (input)="onCommentInput($event)"
-      maxlength="2000"
-    ></textarea>
-
-    <div class="composer-footer">
-      <span>{{ commentText().length }}/2000 characters</span>
-
-      <button
-        type="button"
-        class="comment-submit"
-        [disabled]="!commentText().trim()"
-        (click)="submitComment()"
-      >
-        Post Comment
-      </button>
-    </div>
-
-  </div>
-
-  <!-- Existing comments -->
-  <div class="comments-list">
-
-    @for (comment of comments(); track comment.id) {
-
-      <article class="comment-item">
-
-        <div class="comment-avatar">
-          {{ comment.author.charAt(0).toUpperCase() }}
-        </div>
-
-        <div class="comment-body">
-
-          <div class="comment-meta">
-            <strong>{{ comment.author }}</strong>
-            <span>{{ comment.createdAt | date:'MMM d, y, h:mm a' }}</span>
-          </div>
-
-          <p>{{ comment.message }}</p>
-
-        </div>
-
-      </article>
-
-    } @empty {
-
-      <div class="comments-empty">
-        No comments yet. Start the discussion with your team.
-      </div>
-
-    }
-
-  </div>
-
-</section>
-
+      <a routerLink="/command-center">
+        Return to Command Center
+      </a>
+    </section>
 
   }
 

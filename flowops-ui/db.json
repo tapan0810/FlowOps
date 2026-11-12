@@ -1,0 +1,67 @@
+
+{
+  "incidents": [
+    {
+      "id": "INC-1001",
+      "title": "Payment gateway unavailable",
+      "description": "Payment processing requests are failing.",
+      "serviceName": "Payment Gateway",
+      "severity": "Critical",
+      "status": "Investigating",
+      "assignedTo": "Rahul Sharma",
+      "createdAt": "2026-11-07T08:30:00+05:30",
+      "slaTargetMinutes": 30
+    },
+    {
+      "id": "INC-1002",
+      "title": "Customer portal latency",
+      "description": "Customers are experiencing slow response times.",
+      "serviceName": "Customer Portal",
+      "severity": "High",
+      "status": "Assigned",
+      "assignedTo": "Priya Singh",
+      "createdAt": "2026-11-07T09:10:00+05:30",
+      "slaTargetMinutes": 60
+    },
+    {
+      "id": "INC-1003",
+      "title": "Database connection pool exhausted",
+      "description": "Database connections are being exhausted.",
+      "serviceName": "Customer Database",
+      "severity": "Critical",
+      "status": "Triaged",
+      "assignedTo": "Amit Verma",
+      "createdAt": "2026-11-07T09:25:00+05:30",
+      "slaTargetMinutes": 60
+    },
+    {
+      "id": "INC-1004",
+      "title": "Email notification delay",
+      "description": "Outbound notifications are delayed.",
+      "serviceName": "Notification Service",
+      "severity": "Medium",
+      "status": "Investigating",
+      "assignedTo": "Neha Das",
+      "createdAt": "2026-11-07T10:00:00+05:30",
+      "slaTargetMinutes": 240
+    },
+    {
+      "id": "INC-1005",
+      "title": "Report export failure",
+      "description": "Users cannot export operational reports.",
+      "serviceName": "Reporting Service",
+      "severity": "Low",
+      "status": "New",
+      "assignedTo": "Unassigned",
+      "createdAt": "2026-11-07T10:30:00+05:30",
+      "slaTargetMinutes": 480
+    }
+  ],
+  "comments": [],
+  "activities": [],
+  "notifications": [],
+  "teams": [],
+  "services": [],
+  "workflows": [],
+  "slaPolicies": []
+}

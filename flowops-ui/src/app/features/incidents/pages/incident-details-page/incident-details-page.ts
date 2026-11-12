@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { SlaService } from '../../services/sla';
 
 import type { IncidentStatus } from '../../models/incident.model';
 import { IncidentService } from '../../services/incident.service';
@@ -21,6 +22,7 @@ export class IncidentDetailsPage {
 
   private readonly route = inject(ActivatedRoute);
   private readonly incidentService = inject(IncidentService);
+  private readonly slaService = inject(SlaService);
 
 
   // ==========================================
@@ -208,5 +210,19 @@ export class IncidentDetailsPage {
     }
 
   }
+
+  // ==========================================
+// SLA MANAGEMENT
+// ==========================================
+
+readonly slaMetrics = computed(() => {
+  const current = this.incident();
+
+  if (!current) {
+    return null;
+  }
+
+  return this.slaService.calculateMetrics(current);
+});
 
 }

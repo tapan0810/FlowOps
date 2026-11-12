@@ -373,3 +373,110 @@
   font-size: 12px;
   text-align: center;
 }
+
+.sla-section {
+  margin-top: 22px;
+}
+
+.sla-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  h2 {
+    margin-bottom: 6px;
+  }
+
+  p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+}
+
+.sla-badge {
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.on-track {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+
+  &.at-risk {
+    background: #fff7ed;
+    color: #ea580c;
+  }
+
+  &.breached {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+}
+
+.sla-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 26px 0;
+}
+
+.sla-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  span {
+    color: #94a3b8;
+    font-size: 11px;
+  }
+
+  strong {
+    color: #172033;
+    font-size: 18px;
+  }
+}
+
+.sla-progress-track {
+  width: 100%;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e2e8f0;
+}
+
+.sla-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.3s ease;
+
+  &.on-track {
+    background: #16a34a;
+  }
+
+  &.at-risk {
+    background: #f97316;
+  }
+
+  &.breached {
+    background: #dc2626;
+  }
+}
+
+.sla-progress-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+@media (max-width: 600px) {
+  .sla-metrics {
+    grid-template-columns: 1fr;
+  }
+}
