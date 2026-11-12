@@ -1,5 +1,5 @@
 
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 
 import type {
   Incident,
@@ -10,29 +10,68 @@ import type {
   IncidentActivity
 } from '../models/incident-activity.model';
 
-import { MOCK_INCIDENTS } from '../data/incidents.mock';
+import type {
+  IncidentComment
+} from '../models/incident-comment.model';
 
-import { IncidentComment } from '../models/incident-comment.model';
+import { IncidentApiService } from './incident-api';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IncidentService {
 
-  // Incident state
-  private readonly _incidents = signal<Incident[]>(MOCK_INCIDENTS);
+  // ==========================================
+  // 1. DEPENDENCY INJECTION
+  // ==========================================
+
+  private readonly incidentApi = inject(IncidentApiService);
+
+
+  // ==========================================
+  // 2. INCIDENT STATE
+  // ==========================================
+
+  private readonly _incidents = signal<Incident[]>([]);
 
   readonly incidents = this._incidents.asReadonly();
 
-  // Activity history state
+
+  // ==========================================
+  // 3. LOADING AND ERROR STATE
+  // ==========================================
+
+  private readonly _loading = signal(false);
+
+  readonly loading = this._loading.asReadonly();
+
+  private readonly _error = signal<string | null>(null);
+
+  readonly error = this._error.asReadonly();
+
+
+  // ==========================================
+  // 4. ACTIVITY HISTORY STATE
+  // ==========================================
+
   private readonly _activities = signal<IncidentActivity[]>([]);
 
   readonly activities = this._activities.asReadonly();
 
+
+  // ==========================================
+  // 5. COMMENTS STATE
+  // ==========================================
+
   private readonly _comments = signal<IncidentComment[]>([]);
+
   readonly comments = this._comments.asReadonly();
 
-  // KPI calculations
+
+  // ==========================================
+  // 6. KPI CALCULATIONS
+  // ==========================================
+
   readonly totalIncidents = computed(
     () => this.incidents().length
   );
@@ -59,21 +98,83 @@ export class IncidentService {
     ).length
   );
 
-  // Business rules: allowed status transitions
-  private readonly allowedTransitions: Record<
-  IncidentStatus,
-  readonly IncidentStatus[]
-> = {
-  New: ['Triaged'],
-  Triaged: ['Assigned'],
-  Assigned: ['Investigating'],
-  Investigating: ['Mitigated'],
-  Mitigated: ['Resolved'],
-  Resolved: ['Closed', 'Investigating'],
-  Closed: []
-};
 
-  // Change incident status
+  // ==========================================
+  // 7. BUSINESS RULES: STATUS TRANSITIONS
+  // ==========================================
+
+  private readonly allowedTransitions: Record<
+    IncidentStatus,
+    readonly IncidentStatus[]
+  > = {
+    New: ['Triaged'],
+    Triaged: ['Assigned'],
+    Assigned: ['Investigating'],
+    Investigating: ['Mitigated'],
+    Mitigated: ['Resolved'],
+    Resolved: ['Closed', 'Investigating'],
+    Closed: []
+  };
+
+
+  // ==========================================
+  // 8. INITIALIZE INCIDENT DATA FROM API
+  // ==========================================
+
+  constructor() {
+    this.loadIncidents();
+  }
+
+
+  // ==========================================
+  // 9. GET ALL INCIDENTS
+  // ==========================================
+
+  loadIncidents(): void {
+
+    this._loading.set(true);
+    this._error.set(null);
+
+    this.incidentApi.getIncidents().subscribe({
+
+      next: (incidents) => {
+
+        this._incidents.set(incidents);
+
+        this._loading.set(false);
+
+      },
+
+      error: (error: unknown) => {
+
+        console.error('Failed to load incidents:', error);
+
+        this._error.set(
+          'Unable to load incidents. Please check the API server.'
+        );
+
+        this._loading.set(false);
+
+      }
+
+    });
+
+  }
+
+
+  // ==========================================
+  // 10. REFRESH INCIDENTS
+  // ==========================================
+
+  refreshIncidents(): void {
+    this.loadIncidents();
+  }
+
+
+  // ==========================================
+  // 11. CHANGE INCIDENT STATUS
+  // ==========================================
+
   transitionIncident(
     incidentId: string,
     nextStatus: IncidentStatus,
@@ -111,9 +212,14 @@ export class IncidentService {
     });
 
     return true;
+
   }
 
-  // Assign or reassign an engineer
+
+  // ==========================================
+  // 12. ASSIGN OR REASSIGN ENGINEER
+  // ==========================================
+
   assignIncident(
     incidentId: string,
     assignedTo: string,
@@ -154,15 +260,27 @@ export class IncidentService {
     });
 
     return true;
+
   }
 
-  getAllowedTransitions(
-  currentStatus: IncidentStatus
-): readonly IncidentStatus[] {
-  return this.allowedTransitions[currentStatus] ?? [];
-}
 
-  // Add an activity event
+  // ==========================================
+  // 13. GET ALLOWED TRANSITIONS
+  // ==========================================
+
+  getAllowedTransitions(
+    currentStatus: IncidentStatus
+  ): readonly IncidentStatus[] {
+
+    return this.allowedTransitions[currentStatus] ?? [];
+
+  }
+
+
+  // ==========================================
+  // 14. ADD ACTIVITY HISTORY
+  // ==========================================
+
   private addActivity(
     activity: Omit<IncidentActivity, 'id' | 'createdAt'>
   ): void {
@@ -177,44 +295,49 @@ export class IncidentService {
       newActivity,
       ...current
     ]);
+
   }
 
+
+  // ==========================================
+  // 15. ADD INCIDENT COMMENT
+  // ==========================================
+
   addComment(
-    incidentId:string,
-    message:string,
-    author='Current User'
-  ):boolean{
+    incidentId: string,
+    message: string,
+    author = 'Current User'
+  ): boolean {
 
     const trimmedMessage = message.trim();
 
-    if(!trimmedMessage){
-        return false;
+    if (!trimmedMessage) {
+      return false;
     }
 
-    const incidentExists= this.incidents().some(
-        incident => incident.id === incidentId
+    const incidentExists = this.incidents().some(
+      incident => incident.id === incidentId
     );
 
-    if(!incidentExists){
-        return false;
+    if (!incidentExists) {
+      return false;
     }
 
-    const comment : IncidentComment = {
-    id : `${incidentId}-${Date.now()}`,
-    incidentId,
-    message:trimmedMessage,
-    author,
-    createdAt:new Date().toDateString()
+    const comment: IncidentComment = {
+      id: `${incidentId}-${Date.now()}`,
+      incidentId,
+      message: trimmedMessage,
+      author,
+      createdAt: new Date().toISOString()
     };
 
-
-    this._comments.update(current =>[
-        comment,
-        ...current
-    ])
+    this._comments.update(current => [
+      comment,
+      ...current
+    ]);
 
     return true;
-  }
 
+  }
 
 }
