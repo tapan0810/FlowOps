@@ -1,5 +1,6 @@
 
 import { Injectable, signal, computed, inject } from '@angular/core';
+import { ActivityApiService } from './activity-api';
 
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -60,6 +61,9 @@ export class IncidentService {
   private readonly _activities = signal<IncidentActivity[]>([]);
 
   readonly activities = this._activities.asReadonly();
+
+
+  private readonly activityApi = inject(ActivityApiService);
 
 
   // ==========================================
@@ -318,15 +322,24 @@ export class IncidentService {
 
     const newActivity: IncidentActivity = {
       ...activity,
-      id: `${activity.incidentId}-${Date.now()}`,
+      id: crypto.randomUUID(),
       createdAt: new Date().toISOString()
     };
 
-    this._activities.update(current => [
-      newActivity,
-      ...current
-    ]);
-
+    this.activityApi.createActivity(newActivity).subscribe({
+      next: savedActivity => {
+        this._activities.update(current => [
+          savedActivity,
+          ...current
+        ]);
+      },
+      error: error => {
+        console.error(
+          'Failed to persist activity:',
+          error
+        );
+      }
+    });
   }
 
 
@@ -335,58 +348,73 @@ export class IncidentService {
   // ==========================================
 
   addComment(
-  incidentId: string,
-  message: string,
-  author = 'Current User'
-): Observable<boolean> {
+    incidentId: string,
+    message: string,
+    author = 'Current User'
+  ): Observable<boolean> {
 
-  const trimmedMessage = message.trim();
+    const trimmedMessage = message.trim();
 
-  if (!trimmedMessage) {
-    return of(false);
-  }
-
-  const incidentExists = this.incidents().some(
-    incident => incident.id === incidentId
-  );
-
-  if (!incidentExists) {
-    return of(false);
-  }
-
-  const newComment: IncidentComment = {
-    id: `${incidentId}-${crypto.randomUUID()}`,
-    incidentId,
-    message: trimmedMessage,
-    author,
-    createdAt: new Date().toISOString()
-  };
-
-  return this.incidentApi.createComment(newComment).pipe(
-    tap(savedComment => {
-      this._comments.update(current => [
-        savedComment,
-        ...current
-      ]);
-    }),
-    map(() => true),
-    catchError(error => {
-      console.error('Failed to save comment:', error);
+    if (!trimmedMessage) {
       return of(false);
-    })
-  );
-}
+    }
+
+    const incidentExists = this.incidents().some(
+      incident => incident.id === incidentId
+    );
+
+    if (!incidentExists) {
+      return of(false);
+    }
+
+    const newComment: IncidentComment = {
+      id: `${incidentId}-${crypto.randomUUID()}`,
+      incidentId,
+      message: trimmedMessage,
+      author,
+      createdAt: new Date().toISOString()
+    };
+
+    return this.incidentApi.createComment(newComment).pipe(
+      tap(savedComment => {
+        this._comments.update(current => [
+          savedComment,
+          ...current
+        ]);
+      }),
+      map(() => true),
+      catchError(error => {
+        console.error('Failed to save comment:', error);
+        return of(false);
+      })
+    );
+  }
 
   //========================================
   //. LOAD COMMENTS
   //========================================
   loadComments(): void {
-  this.incidentApi.getComments().subscribe({
-    next: comments => {
-      this._comments.set(comments);
+    this.incidentApi.getComments().subscribe({
+      next: comments => {
+        this._comments.set(comments);
+      },
+      error: error => {
+        console.error('Failed to load comments:', error);
+      }
+    });
+  }
+  //===========================================
+  loadActivities(): void {
+
+  this.activityApi.getActivities().subscribe({
+    next: activities => {
+      this._activities.set(activities);
     },
     error: error => {
-      console.error('Failed to load comments:', error);
+      console.error(
+        'Failed to load activities:',
+        error
+      );
     }
   });
 }
