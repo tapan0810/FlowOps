@@ -335,40 +335,60 @@ export class IncidentService {
   // ==========================================
 
   addComment(
-    incidentId: string,
-    message: string,
-    author = 'Current User'
-  ): boolean {
+  incidentId: string,
+  message: string,
+  author = 'Current User'
+): Observable<boolean> {
 
-    const trimmedMessage = message.trim();
+  const trimmedMessage = message.trim();
 
-    if (!trimmedMessage) {
-      return false;
-    }
-
-    const incidentExists = this.incidents().some(
-      incident => incident.id === incidentId
-    );
-
-    if (!incidentExists) {
-      return false;
-    }
-
-    const comment: IncidentComment = {
-      id: `${incidentId}-${Date.now()}`,
-      incidentId,
-      message: trimmedMessage,
-      author,
-      createdAt: new Date().toISOString()
-    };
-
-    this._comments.update(current => [
-      comment,
-      ...current
-    ]);
-
-    return true;
-
+  if (!trimmedMessage) {
+    return of(false);
   }
+
+  const incidentExists = this.incidents().some(
+    incident => incident.id === incidentId
+  );
+
+  if (!incidentExists) {
+    return of(false);
+  }
+
+  const newComment: IncidentComment = {
+    id: `${incidentId}-${crypto.randomUUID()}`,
+    incidentId,
+    message: trimmedMessage,
+    author,
+    createdAt: new Date().toISOString()
+  };
+
+  return this.incidentApi.createComment(newComment).pipe(
+    tap(savedComment => {
+      this._comments.update(current => [
+        savedComment,
+        ...current
+      ]);
+    }),
+    map(() => true),
+    catchError(error => {
+      console.error('Failed to save comment:', error);
+      return of(false);
+    })
+  );
+}
+
+  //========================================
+  //. LOAD COMMENTS
+  //========================================
+  loadComments(): void {
+  this.incidentApi.getComments().subscribe({
+    next: comments => {
+      this._comments.set(comments);
+    },
+    error: error => {
+      console.error('Failed to load comments:', error);
+    }
+  });
+}
 
 }

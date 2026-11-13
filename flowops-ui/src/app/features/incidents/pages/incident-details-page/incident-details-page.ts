@@ -187,33 +187,34 @@ export class IncidentDetailsPage {
 
   // Submits a new comment
   submitComment(): void {
+  const current = this.incident();
 
-    const current = this.incident();
+  if (!current) {
+    return;
+  }
 
-    if (!current) {
-      return;
-    }
+  const message = this.commentText().trim();
 
-    const message = this.commentText().trim();
+  if (!message) {
+    return;
+  }
 
-    if (!message) {
-      return;
-    }
-
-    const success = this.incidentService.addComment(
+  this.incidentService
+    .addComment(
       current.id,
       message,
       'Current User'
-    );
-
-    if (success) {
-
-      // Clear the comment input after successful submission
-      this.commentText.set('');
-
-    }
-
-  }
+    )
+    .subscribe(success => {
+      if (success) {
+        this.commentText.set('');
+      } else {
+        window.alert(
+          'Unable to save comment. Please try again.'
+        );
+      }
+    });
+}
 
   // ==========================================
 // SLA MANAGEMENT

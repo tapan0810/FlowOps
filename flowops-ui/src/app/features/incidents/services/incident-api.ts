@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import type { Incident } from '../models/incident.model';
+import { IncidentComment } from '../models/incident-comment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -51,4 +52,19 @@ export class IncidentApiService {
       `${this.apiUrl}/${encodeURIComponent(id)}`
     );
   }
+
+  getComments(): Observable<IncidentComment[]> {
+  return this.http.get<IncidentComment[]>(
+    'http://localhost:3000/comments'
+  );
+}
+
+createComment(
+  comment: IncidentComment
+): Observable<IncidentComment> {
+  return this.http.post<IncidentComment>(
+    'http://localhost:3000/comments',
+    comment
+  );
+}
 }
