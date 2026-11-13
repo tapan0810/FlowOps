@@ -4,9 +4,11 @@ import { DatePipe } from '@angular/common';
 
 import { WorkflowService } from '../../services/workflow';
 
+import { RouterLink } from '@angular/router';
+
 @Component({
   selector: 'app-workflow-list-page',
-  imports: [DatePipe],
+  imports: [DatePipe,RouterLink],
   templateUrl: './workflow-list-page.html',
   styleUrl: './workflow-list-page.scss'
 })
