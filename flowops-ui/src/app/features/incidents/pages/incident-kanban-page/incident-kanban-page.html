@@ -1,0 +1,129 @@
+<section class="kanban-page">
+
+  <header class="kanban-header">
+    <div>
+      <span class="eyebrow">OPERATIONS / INCIDENTS</span>
+      <h1>Incident Kanban Board</h1>
+      <p>Track and manage incidents across their lifecycle.</p>
+    </div>
+
+    <a routerLink="/incidents" class="list-link">
+      View incident list
+    </a>
+  </header>
+
+  <div class="board-summary">
+  <div>
+    <strong>{{ incidents().length }}</strong>
+    <span>Total incidents</span>
+  </div>
+
+  <div>
+    <strong>{{ criticalCount() }}</strong>
+    <span>Critical incidents</span>
+  </div>
+
+  <div>
+    <strong>{{ openCount() }}</strong>
+    <span>Open incidents</span>
+  </div>
+</div>
+
+  <div class="kanban-board" cdkDropListGroup>
+
+    @for (column of groupedIncidents(); track column.status) {
+
+      <section class="kanban-column">
+
+        <header class="column-header">
+          <div>
+            <span class="column-indicator"
+              [class]="'indicator-' + column.status.toLowerCase()">
+            </span>
+
+            <h2>{{ column.title }}</h2>
+          </div>
+
+          <span class="column-count">
+            {{ column.incidents.length }}
+          </span>
+        </header>
+
+        <div
+          class="kanban-drop-zone"
+          cdkDropList
+          [cdkDropListData]="column.status"
+          (cdkDropListDropped)="drop($event)"
+        >
+
+          @for (incident of column.incidents; track incident.id) {
+
+            <article
+              class="incident-card"
+              cdkDrag
+              [cdkDragData]="incident"
+              [cdkDragDisabled]="movingIncidentId() === incident.id"
+            >
+
+              <div class="card-top">
+                <span class="incident-id">
+                  {{ incident.id }}
+                </span>
+
+                <span
+                  class="severity"
+                  [class.critical]="incident.severity === 'Critical'"
+                  [class.high]="incident.severity === 'High'"
+                  [class.medium]="incident.severity === 'Medium'"
+                  [class.low]="incident.severity === 'Low'"
+                >
+                  {{ incident.severity }}
+                </span>
+              </div>
+
+              <h3>{{ incident.title }}</h3>
+
+              <p class="service-name">
+                {{ incident.serviceName }}
+              </p>
+
+              <div class="card-footer">
+                <span class="assignee">
+                  {{ incident.assignedTo }}
+                </span>
+
+                <a
+                  [routerLink]="['/incidents', incident.id]"
+                  (click)="$event.stopPropagation()"
+                >
+                  Details
+                </a>
+              </div>
+
+              @if (movingIncidentId() === incident.id) {
+                <div class="moving-indicator">
+                  Updating status...
+                </div>
+              }
+
+              <div *cdkDragPlaceholder class="drag-placeholder"></div>
+
+            </article>
+
+          } @empty {
+
+            <div class="empty-column">
+              Drop an incident here
+            </div>
+
+          }
+
+        </div>
+
+      </section>
+
+    }
+
+  </div>
+
+</section>

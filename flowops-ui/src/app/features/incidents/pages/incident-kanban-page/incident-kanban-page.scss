@@ -1,0 +1,233 @@
+.kanban-page {
+  padding: 28px;
+  color: #1e293b;
+  min-width: 0;
+
+  .kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .eyebrow {
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    h1 {
+      margin: 8px 0;
+      font-size: 28px;
+    }
+
+    p {
+      color: #64748b;
+      margin: 0;
+    }
+
+    .list-link {
+      padding: 11px 16px;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  }
+
+  .board-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 22px;
+      min-width: 145px;
+
+      strong {
+        font-size: 23px;
+      }
+
+      span {
+        font-size: 12px;
+        color: #64748b;
+      }
+    }
+  }
+
+  .kanban-board {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(245px, 1fr));
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 18px;
+    align-items: start;
+  }
+
+  .kanban-column {
+    background: #eef2f7;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    min-height: 450px;
+    padding: 12px;
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      h2 {
+        font-size: 13px;
+        margin: 0;
+      }
+
+      .column-count {
+        background: white;
+        border-radius: 7px;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .column-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  .indicator-new { background: #64748b; }
+  .indicator-triaged { background: #2563eb; }
+  .indicator-assigned { background: #8b5cf6; }
+  .indicator-investigating { background: #f59e0b; }
+  .indicator-mitigated { background: #06b6d4; }
+  .indicator-resolved { background: #16a34a; }
+  .indicator-closed { background: #475569; }
+
+  .kanban-drop-zone {
+    min-height: 370px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .incident-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: grab;
+    box-shadow: 0 2px 5px rgb(15 23 42 / 4%);
+    transition: box-shadow 150ms ease;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      box-shadow: 0 5px 14px rgb(15 23 42 / 10%);
+    }
+
+    h3 {
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 12px 0 5px;
+    }
+
+    .card-top,
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .incident-id,
+    .service-name,
+    .assignee {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .severity {
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .critical { color: #dc2626; }
+    .high { color: #ea580c; }
+    .medium { color: #ca8a04; }
+    .low { color: #16a34a; }
+
+    .card-footer {
+      margin-top: 14px;
+
+      a {
+        font-size: 11px;
+        color: #2563eb;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .empty-column {
+    color: #94a3b8;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    text-align: center;
+    padding: 28px 10px;
+    font-size: 12px;
+  }
+
+  .moving-indicator {
+    font-size: 11px;
+    color: #2563eb;
+    margin-top: 10px;
+  }
+
+  .drag-placeholder {
+    min-height: 115px;
+    border: 2px dashed #94a3b8;
+    background: #dbeafe;
+    border-radius: 10px;
+  }
+
+  .cdk-drag-preview {
+    box-sizing: border-box;
+    box-shadow: 0 10px 30px rgb(15 23 42 / 20%);
+  }
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms ease;
+}
+
+@media (max-width: 700px) {
+  .kanban-page {
+    padding: 16px;
+
+    .kanban-header {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .board-summary {
+      flex-wrap: wrap;
+    }
+  }
+}
