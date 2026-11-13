@@ -1,0 +1,146 @@
+.incident-explorer {
+  padding: 28px;
+  color: #e5e7eb;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    p {
+      color: #94a3b8;
+    }
+  }
+
+  .total-count {
+    background: #1e293b;
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+
+  .filter-panel {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr) auto;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    input,
+    select,
+    button {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #111827;
+      color: #e5e7eb;
+    }
+
+    button {
+      cursor: pointer;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #334155;
+    border-radius: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+
+    th,
+    td {
+      text-align: left;
+      padding: 16px;
+      border-bottom: 1px solid #263449;
+    }
+
+    th {
+      background: #172033;
+      color: #94a3b8;
+    }
+
+    td {
+      background: #111827;
+    }
+
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+  }
+
+  .incident-title {
+    display: block;
+    color: #94a3b8;
+    margin-top: 5px;
+  }
+
+  .severity {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .critical { color: #f87171; }
+  .high { color: #fb923c; }
+  .medium { color: #facc15; }
+  .low { color: #4ade80; }
+
+  .empty-state {
+    text-align: center;
+    padding: 35px;
+    color: #94a3b8;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+
+    button {
+      padding: 10px 16px;
+      margin-left: 8px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: white;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .incident-explorer .filter-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .incident-explorer {
+    padding: 16px;
+
+    .page-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .filter-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+}
