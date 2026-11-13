@@ -1,0 +1,155 @@
+.workflow-page {
+  padding: 28px;
+  color: #1e293b;
+
+  .page-header {
+    margin-bottom: 25px;
+
+    .eyebrow {
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+    }
+
+    h1 {
+      margin: 8px 0;
+      font-size: 28px;
+    }
+
+    p {
+      color: #64748b;
+    }
+  }
+
+  .workflow-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    article {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 20px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+
+      strong {
+        font-size: 25px;
+      }
+
+      span {
+        color: #64748b;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .workflow-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .workflow-card {
+    padding: 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+
+    .workflow-card-header,
+    .workflow-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0 0 5px;
+      font-size: 17px;
+    }
+
+    p {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .workflow-id,
+    .workflow-footer > span {
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .status {
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .active {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .draft {
+      background: #fef3c7;
+      color: #a16207;
+    }
+
+    .disabled {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .workflow-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding: 13px 0;
+      color: #475569;
+      font-size: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .workflow-footer {
+      padding-top: 14px;
+    }
+
+    .workflow-actions {
+      display: flex;
+      gap: 8px;
+
+      button {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: white;
+        color: #334155;
+        cursor: pointer;
+      }
+
+      .delete-button {
+        color: #dc2626;
+      }
+    }
+  }
+}
+
+@media (max-width: 650px) {
+  .workflow-page {
+    padding: 16px;
+
+    .workflow-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .workflow-card .workflow-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+}

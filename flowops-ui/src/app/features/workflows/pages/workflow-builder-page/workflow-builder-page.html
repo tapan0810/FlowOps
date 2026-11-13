@@ -1,1 +1,288 @@
-<p>workflow-builder-page works!</p>
+
+<section class="builder-page">
+
+  <header class="builder-header">
+    <div>
+      <span class="eyebrow">AUTOMATION / WORKFLOW BUILDER</span>
+      <h1>Create Workflow</h1>
+      <p>Configure triggers, conditions and actions.</p>
+    </div>
+
+    <button type="button" class="cancel-button" (click)="cancel()">
+      Cancel
+    </button>
+  </header>
+
+  <!-- Workflow details -->
+  <section class="builder-section">
+    <div class="section-heading">
+      <span class="step-number">01</span>
+      <div>
+        <h2>Workflow Details</h2>
+        <p>Give your automation a name and description.</p>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="workflowName">Workflow Name</label>
+      <input
+        id="workflowName"
+        type="text"
+        placeholder="e.g. Critical Incident Escalation"
+        [value]="name()"
+        (input)="name.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="form-field">
+      <label for="workflowDescription">Description</label>
+      <textarea
+        id="workflowDescription"
+        rows="3"
+        placeholder="Describe what this workflow does..."
+        [value]="description()"
+        (input)="description.set($any($event.target).value)"
+      ></textarea>
+    </div>
+  </section>
+
+  <!-- Trigger -->
+  <section class="builder-section">
+    <div class="section-heading">
+      <span class="step-number">02</span>
+      <div>
+        <h2>Trigger</h2>
+        <p>Choose the event that starts this workflow.</p>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="trigger">When should this workflow run?</label>
+
+      <select
+        id="trigger"
+        [value]="trigger()"
+        (change)="trigger.set($any($event.target).value)"
+      >
+        <option value="IncidentCreated">Incident Created</option>
+        <option value="IncidentUpdated">Incident Updated</option>
+        <option value="SlaBreached">SLA Breached</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Conditions -->
+  <section class="builder-section">
+    <div class="section-heading">
+      <span class="step-number">03</span>
+      <div>
+        <h2>Conditions</h2>
+        <p>Define the rules that must be satisfied.</p>
+      </div>
+    </div>
+
+    @for (condition of conditions(); track condition.id) {
+
+      <div class="rule-row">
+
+        <div class="form-field">
+          <label>Field</label>
+
+          <select
+            [value]="condition.field"
+            (change)="updateConditionField(
+              condition.id,
+              $any($event.target).value
+            )"
+          >
+            <option value="severity">Severity</option>
+            <option value="status">Status</option>
+            <option value="serviceName">Service Name</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Operator</label>
+
+          <select
+            [value]="condition.operator"
+            (change)="updateConditionOperator(
+              condition.id,
+              $any($event.target).value
+            )"
+          >
+            <option value="equals">Equals</option>
+            <option value="notEquals">Does Not Equal</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Value</label>
+
+          @if (condition.field === 'severity') {
+            <select
+              [value]="condition.value"
+              (change)="updateConditionValue(
+                condition.id,
+                $any($event.target).value
+              )"
+            >
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          } @else if (condition.field === 'status') {
+            <select
+              [value]="condition.value"
+              (change)="updateConditionValue(
+                condition.id,
+                $any($event.target).value
+              )"
+            >
+              <option value="New">New</option>
+              <option value="Triaged">Triaged</option>
+              <option value="Assigned">Assigned</option>
+              <option value="Investigating">Investigating</option>
+              <option value="Mitigated">Mitigated</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+            </select>
+          } @else {
+            <input
+              type="text"
+              placeholder="Enter service name"
+              [value]="condition.value"
+              (input)="updateConditionValue(
+                condition.id,
+                $any($event.target).value
+              )"
+            />
+          }
+        </div>
+
+        <button
+          type="button"
+          class="remove-button"
+          (click)="removeCondition(condition.id)"
+        >
+          Remove
+        </button>
+
+      </div>
+
+    } @empty {
+      <div class="empty-rules">
+        No conditions added. This workflow will match every incident
+        that satisfies its trigger.
+      </div>
+    }
+
+    <button type="button" class="add-button" (click)="addCondition()">
+      + Add Condition
+    </button>
+  </section>
+
+  <!-- Actions -->
+  <section class="builder-section">
+    <div class="section-heading">
+      <span class="step-number">04</span>
+      <div>
+        <h2>Actions</h2>
+        <p>Choose what the workflow should do when conditions match.</p>
+      </div>
+    </div>
+
+    @for (action of actions(); track action.id) {
+
+      <div class="action-row">
+
+        <div class="form-field">
+          <label>Action Type</label>
+
+          <select
+            [value]="action.type"
+            (change)="updateActionType(
+              action.id,
+              $any($event.target).value
+            )"
+          >
+            <option value="AssignIncident">Assign Incident</option>
+            <option value="ChangeSeverity">Change Severity</option>
+            <option value="SendNotification">Send Notification</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Configuration</label>
+
+          @if (action.type === 'AssignIncident') {
+            <select
+              [value]="action.value"
+              (change)="updateActionValue(
+                action.id,
+                $any($event.target).value
+              )"
+            >
+              <option value="Incident Manager">Incident Manager</option>
+              <option value="On-call Engineer">On-call Engineer</option>
+              <option value="Service Owner">Service Owner</option>
+            </select>
+          } @else if (action.type === 'ChangeSeverity') {
+            <select
+              [value]="action.value"
+              (change)="updateActionValue(
+                action.id,
+                $any($event.target).value
+              )"
+            >
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          } @else {
+            <input
+              type="text"
+              placeholder="Notification message"
+              [value]="action.value"
+              (input)="updateActionValue(
+                action.id,
+                $any($event.target).value
+              )"
+            />
+          }
+        </div>
+
+        <button
+          type="button"
+          class="remove-button"
+          (click)="removeAction(action.id)"
+        >
+          Remove
+        </button>
+
+      </div>
+
+    }
+
+    <button type="button" class="add-button" (click)="addAction()">
+      + Add Action
+    </button>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="error-message" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <footer class="builder-footer">
+    <span>New workflows are saved as Draft.</span>
+
+    <button type="button" class="save-button" (click)="saveWorkflow()">
+      Save Workflow
+    </button>
+  </footer>
+
+</section>

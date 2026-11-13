@@ -1,1 +1,112 @@
-<p>workflow-list-page works!</p>
+<section class="workflow-page">
+
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">AUTOMATION / WORKFLOWS</span>
+      <h1>Workflow Automation</h1>
+      <p>Design and manage operational automation rules.</p>
+    </div>
+  </header>
+
+  <div class="workflow-stats">
+
+    <article>
+      <strong>{{ totalWorkflows() }}</strong>
+      <span>Total workflows</span>
+    </article>
+
+    <article>
+      <strong>{{ activeWorkflows() }}</strong>
+      <span>Active workflows</span>
+    </article>
+
+    <article>
+      <strong>{{ draftWorkflows() }}</strong>
+      <span>Draft workflows</span>
+    </article>
+
+  </div>
+
+  <div class="workflow-list">
+
+    @for (workflow of workflows(); track workflow.id) {
+
+      <article class="workflow-card">
+
+        <div class="workflow-card-header">
+          <div>
+            <h2>{{ workflow.name }}</h2>
+            <span class="workflow-id">{{ workflow.id }}</span>
+          </div>
+
+          <span
+            class="status"
+            [class.active]="workflow.status === 'Active'"
+            [class.draft]="workflow.status === 'Draft'"
+            [class.disabled]="workflow.status === 'Disabled'"
+          >
+            {{ workflow.status }}
+          </span>
+        </div>
+
+        <p>{{ workflow.description }}</p>
+
+        <div class="workflow-meta">
+          <span>
+            Trigger: {{ workflow.trigger }}
+          </span>
+
+          <span>
+            Conditions: {{ workflow.conditions.length }}
+          </span>
+
+          <span>
+            Actions: {{ workflow.actions.length }}
+          </span>
+        </div>
+
+        <div class="workflow-footer">
+          <span>
+            Updated {{ workflow.updatedAt | date:'mediumDate' }}
+          </span>
+
+          <div class="workflow-actions">
+
+            @if (workflow.status !== 'Active') {
+              <button
+                type="button"
+                (click)="changeStatus(workflow.id, 'Active')"
+              >
+                Activate
+              </button>
+            }
+
+            @if (workflow.status === 'Active') {
+              <button
+                type="button"
+                (click)="changeStatus(workflow.id, 'Disabled')"
+              >
+                Disable
+              </button>
+            }
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteWorkflow(workflow.id)"
+            >
+              Delete
+            </button>
+
+          </div>
+        </div>
+
+      </article>
+
+    } @empty {
+      <p>No workflows have been created yet.</p>
+    }
+
+  </div>
+
+</section>
