@@ -1,4 +1,3 @@
-
 {
   "incidents": [
     {
@@ -51,7 +50,7 @@
       "description": "Users cannot export operational reports.",
       "serviceName": "Reporting Service",
       "severity": "Low",
-      "status": "New",
+      "status": "Triaged",
       "assignedTo": "Unassigned",
       "createdAt": "2026-11-07T10:30:00+05:30",
       "slaTargetMinutes": 480

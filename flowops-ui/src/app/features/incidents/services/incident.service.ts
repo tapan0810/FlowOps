@@ -1,6 +1,9 @@
 
 import { Injectable, signal, computed, inject } from '@angular/core';
 
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+
 import type {
   Incident,
   IncidentStatus
@@ -107,14 +110,14 @@ export class IncidentService {
     IncidentStatus,
     readonly IncidentStatus[]
   > = {
-    New: ['Triaged'],
-    Triaged: ['Assigned'],
-    Assigned: ['Investigating'],
-    Investigating: ['Mitigated'],
-    Mitigated: ['Resolved'],
-    Resolved: ['Closed', 'Investigating'],
-    Closed: []
-  };
+      New: ['Triaged'],
+      Triaged: ['Assigned'],
+      Assigned: ['Investigating'],
+      Investigating: ['Mitigated'],
+      Mitigated: ['Resolved'],
+      Resolved: ['Closed', 'Investigating'],
+      Closed: []
+    };
 
 
   // ==========================================
@@ -179,40 +182,54 @@ export class IncidentService {
     incidentId: string,
     nextStatus: IncidentStatus,
     performedBy = 'Current User'
-  ): boolean {
+  ): Observable<boolean> {
 
     const incident = this.incidents().find(
       item => item.id === incidentId
     );
 
     if (!incident) {
-      return false;
+      return of(false);
     }
 
     const allowedStatuses =
       this.allowedTransitions[incident.status];
 
     if (!allowedStatuses.includes(nextStatus)) {
-      return false;
+      return of(false);
     }
 
-    this._incidents.update(current =>
-      current.map(item =>
-        item.id === incidentId
-          ? { ...item, status: nextStatus }
-          : item
-      )
-    );
-
-    this.addActivity({
+    return this.incidentApi.updateIncident(
       incidentId,
-      type: 'StatusChanged',
-      message: `Status changed from ${incident.status} to ${nextStatus}`,
-      performedBy
-    });
+      { status: nextStatus }
+    ).pipe(
+      tap(updatedIncident => {
 
-    return true;
+        // Update local application state only after API success.
+        this._incidents.update(current =>
+          current.map(item =>
+            item.id === incidentId
+              ? updatedIncident
+              : item
+          )
+        );
 
+        // Record the successful operation.
+        this.addActivity({
+          incidentId,
+          type: 'StatusChanged',
+          message: `Status changed from ${incident.status} to ${nextStatus}`,
+          performedBy
+        });
+      }),
+
+      map(() => true),
+
+      catchError(error => {
+        console.error('Failed to update incident status:', error);
+        return of(false);
+      })
+    );
   }
 
 
@@ -224,12 +241,12 @@ export class IncidentService {
     incidentId: string,
     assignedTo: string,
     performedBy = 'Current User'
-  ): boolean {
+  ): Observable<boolean> {
 
     const engineer = assignedTo.trim();
 
     if (!engineer || engineer === 'Unassigned') {
-      return false;
+      return of(false);
     }
 
     const incident = this.incidents().find(
@@ -237,30 +254,44 @@ export class IncidentService {
     );
 
     if (!incident || incident.status === 'Closed') {
-      return false;
+      return of(false);
     }
 
     if (incident.assignedTo === engineer) {
-      return false;
+      return of(false);
     }
 
-    this._incidents.update(current =>
-      current.map(item =>
-        item.id === incidentId
-          ? { ...item, assignedTo: engineer }
-          : item
-      )
-    );
-
-    this.addActivity({
+    return this.incidentApi.updateIncident(
       incidentId,
-      type: 'Assigned',
-      message: `Assigned to ${engineer}`,
-      performedBy
-    });
+      { assignedTo: engineer }
+    ).pipe(
+      tap(updatedIncident => {
 
-    return true;
+        // Update the frontend only after API success.
+        this._incidents.update(current =>
+          current.map(item =>
+            item.id === incidentId
+              ? updatedIncident
+              : item
+          )
+        );
 
+        // Record assignment activity.
+        this.addActivity({
+          incidentId,
+          type: 'Assigned',
+          message: `Assigned to ${engineer}`,
+          performedBy
+        });
+      }),
+
+      map(() => true),
+
+      catchError(error => {
+        console.error('Failed to assign incident:', error);
+        return of(false);
+      })
+    );
   }
 
 

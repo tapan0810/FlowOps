@@ -73,24 +73,26 @@ export class IncidentDetailsPage {
 
   // Change incident status
   changeStatus(nextStatus: IncidentStatus): void {
+  const current = this.incident();
 
-    const current = this.incident();
+  if (!current) {
+    return;
+  }
 
-    if (!current) {
-      return;
-    }
-
-    const success = this.incidentService.transitionIncident(
+  this.incidentService
+    .transitionIncident(
       current.id,
       nextStatus,
       'Current User'
-    );
-
-    if (!success) {
-      window.alert('This status transition is not allowed.');
-    }
-
-  }
+    )
+    .subscribe(success => {
+      if (!success) {
+        window.alert(
+          'Unable to update incident status. Please try again.'
+        );
+      }
+    });
+} 
 
 
   // ==========================================
@@ -99,35 +101,37 @@ export class IncidentDetailsPage {
 
   readonly selectedEngineer = signal('');
 
-  assignEngineer(event: Event): void {
+ assignEngineer(event: Event): void {
+  const current = this.incident();
 
-    const current = this.incident();
+  if (!current) {
+    return;
+  }
 
-    if (!current) {
-      return;
-    }
+  const engineer = (event.target as HTMLSelectElement).value;
 
-    const engineer = (
-      event.target as HTMLSelectElement
-    ).value;
+  if (!engineer) {
+    return;
+  }
 
-    if (!engineer) {
-      return;
-    }
-
-    const success = this.incidentService.assignIncident(
+  this.incidentService
+    .assignIncident(
       current.id,
       engineer,
       'Current User'
-    );
+    )
+    .subscribe(success => {
 
-    if (success) {
-      this.selectedEngineer.set('');
-    } else {
-      window.alert('Unable to assign this engineer.');
-    }
+      if (success) {
+        this.selectedEngineer.set('');
+      } else {
+        window.alert(
+          'Unable to assign this engineer. Please try again.'
+        );
+      }
 
-  }
+    });
+}
 
 
   // ==========================================
