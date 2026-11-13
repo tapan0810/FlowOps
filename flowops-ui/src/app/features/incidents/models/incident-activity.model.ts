@@ -1,8 +1,7 @@
-
 export type IncidentActivityType =
-  | 'Created'
   | 'StatusChanged'
-  | 'Assigned';
+  | 'Assigned'
+  | 'CommentAdded';
 
 export interface IncidentActivity {
   id: string;
@@ -11,4 +10,7 @@ export interface IncidentActivity {
   message: string;
   performedBy: string;
   createdAt: string;
+
+  previousValue?: string;
+  newValue?: string;
 }
