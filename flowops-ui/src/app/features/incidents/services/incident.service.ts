@@ -1,9 +1,11 @@
 
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { ActivityApiService } from './activity-api';
 
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+
+import { IncidentApiService } from './incident-api';
+import { ActivityApiService } from './activity-api';
 
 import type {
   Incident,
@@ -18,65 +20,35 @@ import type {
   IncidentComment
 } from '../models/incident-comment.model';
 
-import { IncidentApiService } from './incident-api';
-
 @Injectable({
   providedIn: 'root'
 })
 export class IncidentService {
 
-  // ==========================================
-  // 1. DEPENDENCY INJECTION
-  // ==========================================
-
   private readonly incidentApi = inject(IncidentApiService);
-
+  private readonly activityApi = inject(ActivityApiService);
 
   // ==========================================
-  // 2. INCIDENT STATE
+  // 1. APPLICATION STATE
   // ==========================================
 
   private readonly _incidents = signal<Incident[]>([]);
-
   readonly incidents = this._incidents.asReadonly();
 
+  private readonly _activities = signal<IncidentActivity[]>([]);
+  readonly activities = this._activities.asReadonly();
 
-  // ==========================================
-  // 3. LOADING AND ERROR STATE
-  // ==========================================
+  private readonly _comments = signal<IncidentComment[]>([]);
+  readonly comments = this._comments.asReadonly();
 
   private readonly _loading = signal(false);
-
   readonly loading = this._loading.asReadonly();
 
   private readonly _error = signal<string | null>(null);
-
   readonly error = this._error.asReadonly();
 
-
   // ==========================================
-  // 4. ACTIVITY HISTORY STATE
-  // ==========================================
-
-  private readonly _activities = signal<IncidentActivity[]>([]);
-
-  readonly activities = this._activities.asReadonly();
-
-
-  private readonly activityApi = inject(ActivityApiService);
-
-
-  // ==========================================
-  // 5. COMMENTS STATE
-  // ==========================================
-
-  private readonly _comments = signal<IncidentComment[]>([]);
-
-  readonly comments = this._comments.asReadonly();
-
-
-  // ==========================================
-  // 6. KPI CALCULATIONS
+  // 2. DASHBOARD KPI STATE
   // ==========================================
 
   readonly totalIncidents = computed(
@@ -105,88 +77,75 @@ export class IncidentService {
     ).length
   );
 
-
   // ==========================================
-  // 7. BUSINESS RULES: STATUS TRANSITIONS
+  // 3. INCIDENT LIFECYCLE RULES
   // ==========================================
 
   private readonly allowedTransitions: Record<
     IncidentStatus,
     readonly IncidentStatus[]
   > = {
-      New: ['Triaged'],
-      Triaged: ['Assigned'],
-      Assigned: ['Investigating'],
-      Investigating: ['Mitigated'],
-      Mitigated: ['Resolved'],
-      Resolved: ['Closed', 'Investigating'],
-      Closed: []
-    };
-
+    New: ['Triaged'],
+    Triaged: ['Assigned'],
+    Assigned: ['Investigating'],
+    Investigating: ['Mitigated'],
+    Mitigated: ['Resolved'],
+    Resolved: ['Closed', 'Investigating'],
+    Closed: []
+  };
 
   // ==========================================
-  // 8. INITIALIZE INCIDENT DATA FROM API
+  // 4. INITIAL DATA LOADING
   // ==========================================
 
   constructor() {
-    this.loadIncidents();
+    this.refreshAll();
   }
 
+  refreshAll(): void {
+    this.loadIncidents();
+    this.loadComments();
+    this.loadActivities();
+  }
 
   // ==========================================
-  // 9. GET ALL INCIDENTS
+  // 5. LOAD INCIDENTS
   // ==========================================
 
   loadIncidents(): void {
-
     this._loading.set(true);
     this._error.set(null);
 
     this.incidentApi.getIncidents().subscribe({
-
-      next: (incidents) => {
-
+      next: incidents => {
         this._incidents.set(incidents);
-
         this._loading.set(false);
-
       },
-
-      error: (error: unknown) => {
-
+      error: error => {
         console.error('Failed to load incidents:', error);
 
         this._error.set(
-          'Unable to load incidents. Please check the API server.'
+          'Unable to load incidents. Please check whether the API server is running.'
         );
 
         this._loading.set(false);
-
       }
-
     });
-
   }
-
-
-  // ==========================================
-  // 10. REFRESH INCIDENTS
-  // ==========================================
 
   refreshIncidents(): void {
     this.loadIncidents();
   }
 
-
   // ==========================================
-  // 11. CHANGE INCIDENT STATUS
+  // 6. CHANGE INCIDENT STATUS
   // ==========================================
 
   transitionIncident(
     incidentId: string,
     nextStatus: IncidentStatus,
     performedBy = 'Current User'
-  ): Observable<boolean> {
+  ) {
 
     const incident = this.incidents().find(
       item => item.id === incidentId
@@ -209,7 +168,6 @@ export class IncidentService {
     ).pipe(
       tap(updatedIncident => {
 
-        // Update local application state only after API success.
         this._incidents.update(current =>
           current.map(item =>
             item.id === incidentId
@@ -218,12 +176,13 @@ export class IncidentService {
           )
         );
 
-        // Record the successful operation.
         this.addActivity({
           incidentId,
           type: 'StatusChanged',
           message: `Status changed from ${incident.status} to ${nextStatus}`,
-          performedBy
+          performedBy,
+          previousValue: incident.status,
+          newValue: nextStatus
         });
       }),
 
@@ -236,16 +195,15 @@ export class IncidentService {
     );
   }
 
-
   // ==========================================
-  // 12. ASSIGN OR REASSIGN ENGINEER
+  // 7. ASSIGN ENGINEER
   // ==========================================
 
   assignIncident(
     incidentId: string,
     assignedTo: string,
     performedBy = 'Current User'
-  ): Observable<boolean> {
+  ) {
 
     const engineer = assignedTo.trim();
 
@@ -271,7 +229,6 @@ export class IncidentService {
     ).pipe(
       tap(updatedIncident => {
 
-        // Update the frontend only after API success.
         this._incidents.update(current =>
           current.map(item =>
             item.id === incidentId
@@ -280,12 +237,13 @@ export class IncidentService {
           )
         );
 
-        // Record assignment activity.
         this.addActivity({
           incidentId,
           type: 'Assigned',
           message: `Assigned to ${engineer}`,
-          performedBy
+          performedBy,
+          previousValue: incident.assignedTo,
+          newValue: engineer
         });
       }),
 
@@ -298,22 +256,18 @@ export class IncidentService {
     );
   }
 
-
   // ==========================================
-  // 13. GET ALLOWED TRANSITIONS
+  // 8. AVAILABLE STATUS TRANSITIONS
   // ==========================================
 
   getAllowedTransitions(
     currentStatus: IncidentStatus
   ): readonly IncidentStatus[] {
-
     return this.allowedTransitions[currentStatus] ?? [];
-
   }
 
-
   // ==========================================
-  // 14. ADD ACTIVITY HISTORY
+  // 9. SAVE ACTIVITY HISTORY
   // ==========================================
 
   private addActivity(
@@ -334,24 +288,35 @@ export class IncidentService {
         ]);
       },
       error: error => {
-        console.error(
-          'Failed to persist activity:',
-          error
-        );
+        console.error('Failed to persist activity:', error);
       }
     });
   }
 
+  // ==========================================
+  // 10. LOAD ACTIVITY HISTORY
+  // ==========================================
+
+  loadActivities(): void {
+    this.activityApi.getActivities().subscribe({
+      next: activities => {
+        this._activities.set(activities);
+      },
+      error: error => {
+        console.error('Failed to load activities:', error);
+      }
+    });
+  }
 
   // ==========================================
-  // 15. ADD INCIDENT COMMENT
+  // 11. SAVE INCIDENT COMMENT
   // ==========================================
 
   addComment(
     incidentId: string,
     message: string,
     author = 'Current User'
-  ): Observable<boolean> {
+  ) {
 
     const trimmedMessage = message.trim();
 
@@ -377,12 +342,22 @@ export class IncidentService {
 
     return this.incidentApi.createComment(newComment).pipe(
       tap(savedComment => {
+
         this._comments.update(current => [
           savedComment,
           ...current
         ]);
+
+        this.addActivity({
+          incidentId,
+          type: 'CommentAdded',
+          message: `${author} added a comment`,
+          performedBy: author
+        });
       }),
+
       map(() => true),
+
       catchError(error => {
         console.error('Failed to save comment:', error);
         return of(false);
@@ -390,9 +365,10 @@ export class IncidentService {
     );
   }
 
-  //========================================
-  //. LOAD COMMENTS
-  //========================================
+  // ==========================================
+  // 12. LOAD COMMENTS
+  // ==========================================
+
   loadComments(): void {
     this.incidentApi.getComments().subscribe({
       next: comments => {
@@ -403,20 +379,4 @@ export class IncidentService {
       }
     });
   }
-  //===========================================
-  loadActivities(): void {
-
-  this.activityApi.getActivities().subscribe({
-    next: activities => {
-      this._activities.set(activities);
-    },
-    error: error => {
-      console.error(
-        'Failed to load activities:',
-        error
-      );
-    }
-  });
-}
-
 }

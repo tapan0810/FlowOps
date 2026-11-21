@@ -1,8 +1,7 @@
-<aside class="sidebar">
 
+<aside class="sidebar">
   <div class="brand">
     <div class="brand-logo">F</div>
-
     <div class="brand-info">
       <h2>FlowOps</h2>
       <span>Operations Platform</span>
@@ -12,12 +11,10 @@
   <div class="workspace">
     <span class="workspace-label">WORKSPACE</span>
 
-    <a
-      routerLink="/command-center"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-      class="nav-item"
-    >
+    <a routerLink="/command-center"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-item">
       <span class="nav-icon">◫</span>
       <span>Command Center</span>
     </a>
@@ -26,27 +23,45 @@
   <div class="workspace">
     <span class="workspace-label">OPERATIONS</span>
 
-    <div class="nav-item disabled">
+    <a routerLink="/incidents"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-item">
       <span class="nav-icon">◈</span>
-      <span>Incidents</span>
-      <span class="coming-soon">Soon</span>
-    </div>
+      <span>Incident Explorer</span>
+    </a>
 
-    <div class="nav-item disabled">
+    <a routerLink="/incidents/board"
+       routerLinkActive="active"
+       class="nav-item">
+      <span class="nav-icon">▦</span>
+      <span>Incident Kanban</span>
+    </a>
+
+    <a routerLink="/workflows"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-item">
       <span class="nav-icon">⇄</span>
-      <span>Workflows</span>
-      <span class="coming-soon">Soon</span>
-    </div>
+      <span>Workflow Management</span>
+    </a>
+
+    <a routerLink="/workflows/new"
+       routerLinkActive="active"
+       class="nav-item">
+      <span class="nav-icon">＋</span>
+      <span>Workflow Builder</span>
+    </a>
+  </div>
+
+  <div class="workspace">
+    <span class="workspace-label">MANAGEMENT</span>
 
     <div class="nav-item disabled">
       <span class="nav-icon">◷</span>
       <span>SLA Management</span>
       <span class="coming-soon">Soon</span>
     </div>
-  </div>
-
-  <div class="workspace">
-    <span class="workspace-label">MANAGEMENT</span>
 
     <div class="nav-item disabled">
       <span class="nav-icon">▤</span>
@@ -65,5 +80,4 @@
     <div class="status-indicator"></div>
     <span>All systems operational</span>
   </div>
-
 </aside>

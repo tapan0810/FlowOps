@@ -9,6 +9,7 @@ import {
   CdkDragDrop,
   CdkDrag,
   CdkDropList,
+  CdkDragPlaceholder,
   CdkDropListGroup
 } from '@angular/cdk/drag-drop';
 
@@ -33,6 +34,7 @@ interface KanbanColumn {
     CdkDrag,
     CdkDropList,
     CdkDropListGroup,
+     CdkDragPlaceholder,
     RouterLink
   ],
   templateUrl: './incident-kanban-page.html',

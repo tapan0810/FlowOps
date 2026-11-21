@@ -1,12 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { IncidentApi } from './incident-api';
+import { provideHttpClient } from '@angular/common/http';
+import { IncidentApiService } from './incident-api';
 
-describe('IncidentApi', () => {
-  let service: IncidentApi;
+describe('IncidentApiService', () => {
+  let service: IncidentApiService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(IncidentApi);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient()]
+    });
+
+    service = TestBed.inject(IncidentApiService);
   });
 
   it('should be created', () => {

@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { Sla } from './sla';
+import { SlaService } from './sla';
 
-describe('Sla', () => {
-  let service: Sla;
+describe('SlaService', () => {
+  let service: SlaService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Sla);
+
+    service = TestBed.inject(SlaService);
   });
 
   it('should be created', () => {

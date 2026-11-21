@@ -1,17 +1,12 @@
-import { Service } from '@angular/core';
-
-@Service()
-export class WorkflowEngine {}
 import { Injectable } from '@angular/core';
 
 import type {
   Workflow,
-  WorkflowCondition
+  WorkflowCondition,
+  WorkflowTrigger
 } from '../models/workflow.model';
 
-import type {
-  Incident
-} from '../../incidents/models/incident.model';
+import type { Incident } from '../../incidents/models/incident.model';
 
 export interface WorkflowEvaluationResult {
   workflowId: string;
@@ -21,82 +16,55 @@ export interface WorkflowEvaluationResult {
   actions: Workflow['actions'];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+/**
+ * Evaluates workflow rules only. It deliberately does not execute actions:
+ * real action execution belongs in a trusted backend worker.
+ */
+@Injectable({ providedIn: 'root' })
 export class WorkflowEngineService {
-
   evaluateWorkflow(
     workflow: Workflow,
-    incident: Incident
+    incident: Incident,
+    event: WorkflowTrigger = 'IncidentCreated'
   ): WorkflowEvaluationResult {
-
-    if (workflow.status !== 'Active') {
-      return {
-        workflowId: workflow.id,
-        workflowName: workflow.name,
-        matched: false,
-        reason: 'Workflow is not active.',
-        actions: []
-      };
-    }
-
-    if (!this.matchesTrigger(workflow, 'IncidentCreated')) {
-      return {
-        workflowId: workflow.id,
-        workflowName: workflow.name,
-        matched: false,
-        reason: 'Trigger does not match.',
-        actions: []
-      };
-    }
-
-    const conditionsMatched =
-      workflow.conditions.every(condition =>
-        this.evaluateCondition(condition, incident)
-      );
-
-    if (!conditionsMatched) {
-      return {
-        workflowId: workflow.id,
-        workflowName: workflow.name,
-        matched: false,
-        reason: 'One or more conditions were not satisfied.',
-        actions: []
-      };
-    }
-
-    return {
+    const result = (matched: boolean, reason: string): WorkflowEvaluationResult => ({
       workflowId: workflow.id,
       workflowName: workflow.name,
-      matched: true,
-      reason: 'All conditions matched.',
-      actions: workflow.actions
-    };
-  }
+      matched,
+      reason,
+      actions: matched ? workflow.actions : []
+    });
 
-  private matchesTrigger(
-    workflow: Workflow,
-    event: 'IncidentCreated'
-  ): boolean {
-    return workflow.trigger === event;
+    if (workflow.status !== 'Active') {
+      return result(false, 'Workflow is not active.');
+    }
+
+    if (workflow.trigger !== event) {
+      return result(false, 'Trigger does not match.');
+    }
+
+    const failedCondition = workflow.conditions.find(
+      condition => !this.evaluateCondition(condition, incident)
+    );
+
+    if (failedCondition) {
+      return result(false, `Condition did not match: ${failedCondition.field} ${failedCondition.operator} ${failedCondition.value}.`);
+    }
+
+    return result(true, 'Trigger and all conditions matched.');
   }
 
   private evaluateCondition(
     condition: WorkflowCondition,
     incident: Incident
   ): boolean {
-
-    const actualValue = incident[condition.field];
+    const actualValue = String(incident[condition.field]);
 
     switch (condition.operator) {
-
       case 'equals':
         return actualValue === condition.value;
-
       case 'notEquals':
         return actualValue !== condition.value;
-
       default:
         return false;
     }
