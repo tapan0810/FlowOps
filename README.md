@@ -2,7 +2,7 @@
 
 **FlowOps** is an enterprise-oriented workflow and incident management platform designed to centralize operational visibility, streamline incident handling, and improve workflow coordination.
 
-The platform provides a unified workspace for monitoring incidents, managing workflows, tracking operational activities, and organizing work through a structured interface.
+The platform provides a unified workspace for monitoring incidents,  managing workflows, tracking operational activities, and organizing work through a structured interface.
 
 The project is being developed with a modern full-stack architecture using **Angular, ASP.NET Core, and Microsoft SQL Server**, with an emphasis on maintainability, scalability, modular development, and a clean user experience.
 
